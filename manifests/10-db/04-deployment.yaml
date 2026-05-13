@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: demo-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: registry.redhat.io/rhel9/postgresql-16:latest
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-creds
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pgsql/data
+            - name: init
+              mountPath: /opt/app-root/src/postgresql-start
+          readinessProbe:
+            exec:
+              command: ["bash", "-c", "psql -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'select 1'"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data
+        - name: init
+          configMap:
+            name: postgres-init
