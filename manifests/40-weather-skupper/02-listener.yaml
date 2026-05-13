@@ -1,0 +1,9 @@
+apiVersion: skupper.io/v2alpha1
+kind: Listener
+metadata:
+  name: weather
+  namespace: demo-weather
+spec:
+  routingKey: weather
+  host: weather
+  port: 8080

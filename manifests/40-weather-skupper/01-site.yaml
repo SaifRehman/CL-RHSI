@@ -1,0 +1,7 @@
+apiVersion: skupper.io/v2alpha1
+kind: Site
+metadata:
+  name: demo-weather
+  namespace: demo-weather
+spec:
+  linkAccess: default
