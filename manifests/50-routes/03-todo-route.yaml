@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: todo-route
+  namespace: demo-todo
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: prod-web
+      namespace: ingress-gateway
+  hostnames:
+    - todo.travels.sandbox3259.opentlc.com
+  rules:
+    - matches:
+        - path: { type: PathPrefix, value: /api/todos }
+        - path: { type: PathPrefix, value: /healthz }
+      backendRefs:
+        - name: todo-backend
+          port: 8000

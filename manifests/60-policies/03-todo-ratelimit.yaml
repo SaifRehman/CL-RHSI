@@ -1,0 +1,27 @@
+apiVersion: kuadrant.io/v1
+kind: RateLimitPolicy
+metadata:
+  name: todo-ratelimit
+  namespace: demo-todo
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: todo-route
+  limits:
+    free-tier:
+      rates:
+        - limit: 5
+          window: 1m
+      when:
+        - predicate: "auth.identity.groups == 'free'"
+      counters:
+        - expression: auth.identity.userid
+    premium-tier:
+      rates:
+        - limit: 30
+          window: 1m
+      when:
+        - predicate: "auth.identity.groups == 'premium'"
+      counters:
+        - expression: auth.identity.userid

@@ -1,0 +1,17 @@
+apiVersion: kuadrant.io/v1
+kind: RateLimitPolicy
+metadata:
+  name: weather-ratelimit
+  namespace: demo-weather
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: weather-route
+  limits:
+    per-ip:
+      rates:
+        - limit: 10
+          window: 1m
+      counters:
+        - expression: 'request.headers["x-forwarded-for"].split(",")[0]'

@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-key-free
+  namespace: kuadrant-system
+  labels:
+    kuadrant.io/auth-secret: "true"
+    app: clrhsi-demo
+  annotations:
+    kuadrant.io/groups: free
+    secret.kuadrant.io/user-id: alice
+type: Opaque
+stringData:
+  api_key: ALICEFREE-3f8a7c2d-2b6e-4c0f-9a1d
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-key-premium
+  namespace: kuadrant-system
+  labels:
+    kuadrant.io/auth-secret: "true"
+    app: clrhsi-demo
+  annotations:
+    kuadrant.io/groups: premium
+    secret.kuadrant.io/user-id: bob
+type: Opaque
+stringData:
+  api_key: BOBPREMIUM-8d4e1a6f-4c9b-4b2e-b3c5

@@ -1,0 +1,31 @@
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: todo-auth
+  namespace: demo-todo
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: todo-route
+  rules:
+    authentication:
+      api-key-users:
+        apiKey:
+          selector:
+            matchLabels:
+              kuadrant.io/auth-secret: "true"
+          allNamespaces: true
+        credentials:
+          authorizationHeader:
+            prefix: APIKEY
+    response:
+      success:
+        filters:
+          identity:
+            json:
+              properties:
+                userid:
+                  selector: 'auth.identity.metadata.annotations.secret\.kuadrant\.io/user-id'
+                groups:
+                  selector: 'auth.identity.metadata.annotations.kuadrant\.io/groups'
