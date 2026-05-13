@@ -14,4 +14,4 @@ spec:
         - limit: 10
           window: 1m
       counters:
-        - expression: 'request.headers["x-forwarded-for"].split(",")[0]'
+        - expression: request.host

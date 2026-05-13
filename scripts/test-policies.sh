@@ -46,23 +46,16 @@ for i in $(seq 1 30); do
 done
 [ "$ok_count" = "30" ] && pass "premium tier: 30x 200" || fail "premium tier: only $ok_count succeeded"
 
-echo "==> E. Weather route reachable via Skupper (12 calls -> all 200)"
-# NOTE: The weather RateLimitPolicy declares a per-IP limit of 10/min using the
-# CEL counter expression request.headers["x-forwarded-for"].split(",")[0].
-# Kuadrant marks the policy Enforced=True, but Limitador v2.2.0 cannot parse
-# the nested-quote descriptor it generates from that expression (logs:
-# "Invalid limit file: ... unrecognized token: 'x' ...").  As a result no
-# per-IP counter is actually applied, so 12 sequential curls all return 200.
-# The most reliable assertion the test can make on the cluster as-built is
-# that the weather route is healthy end-to-end through Skupper from the
-# Gateway on cluster all the way to the podman weather-app on RHEL.
-ok=0
+echo "==> E. Weather IP rate-limit (10/min): 12 calls -> >=10x 200, >=1x 429"
+sleep 65
+ok=0; lim=0
 for i in $(seq 1 12); do
   code=$(curl -sk -o /dev/null -w "%{http_code}" -H "Authorization: APIKEY $KEY_FREE" "$WEATHER/current?city=Berlin")
   [ "$code" = "200" ] && ok=$((ok+1))
+  [ "$code" = "429" ] && lim=$((lim+1))
   sleep 0.1
 done
-[ "$ok" = "12" ] && pass "weather route reachable: 12x 200 via Skupper" || fail "weather route: only $ok/12 returned 200"
+[ "$ok" -ge "10" ] && [ "$lim" -ge "1" ] && pass "weather rate-limit: 200=$ok 429=$lim" || fail "weather counts: 200=$ok 429=$lim"
 
 echo
 echo "ALL CHECKS PASS"
