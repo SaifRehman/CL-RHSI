@@ -45,7 +45,8 @@ Showcase Red Hat Connectivity Link (Kuadrant) gateway policies — Auth, RateLim
   - `DELETE /api/todos/{id}` → delete
 - DB connection from env: `PG_HOST`, `PG_DB`, `PG_USER`, `PG_PASSWORD` (mounted from secret `postgres-creds` projected across namespaces, or via per-namespace secret created at deploy time).
 - CORS: allow origin `https://app.travels.sandbox3259.opentlc.com` on both the todo backend and the weather service (since the browser hits them cross-origin).
-- Resources: Deployment (1 replica), Service (port 8000), Secret with DB creds, container image built locally and pushed to OpenShift internal registry (`image-registry.openshift-image-registry.svc:5000/demo-todo/todo-backend:latest`) via `oc new-build`/`BuildConfig` or `oc start-build` from local files.
+- Resources: Deployment (1 replica), Service (port 8000), Secret with DB creds.
+- Container image built locally with `podman build` and pushed to **`quay.io/rh-ee-srehman/todo:latest`** (public repo). The Deployment pulls from there directly — no in-cluster build, no internal registry plumbing.
 
 ### Database — namespace `demo-db`
 
@@ -69,7 +70,7 @@ Showcase Red Hat Connectivity Link (Kuadrant) gateway policies — Auth, RateLim
     3. Return `{"city", "temp_c", "wind_kph", "weather_code", "description"}`.
   - Endpoint `GET /healthz` → `{"ok": true}`.
   - CORS: allow `https://app.travels.sandbox3259.opentlc.com`.
-- Run via `podman run -d --name weather-app --restart=unless-stopped -p 127.0.0.1:8080:8080 weather:latest`.
+- Image is built locally with `podman build` and pushed to **`quay.io/rh-ee-srehman/weather:latest`** (public repo). On RHEL, the container is run via `podman run -d --name weather-app --restart=unless-stopped -p 127.0.0.1:8080:8080 quay.io/rh-ee-srehman/weather:latest` — no build on the RHEL host.
 - Skupper v2 podman site joined to the cluster via redeemed `AccessGrant`. Connector with routingKey `weather`, host `host.containers.internal` (or the bridge IP), port `8080`.
 
 ## Ingress topology
@@ -224,6 +225,33 @@ The `app.travels...` HTTPRoute has no AuthPolicy/RateLimitPolicy. The UI must lo
 8. **Demo IP rate-limit** — Loop weather 12× → 11th/12th return 429.
 9. **Cleanup** — `./scripts/cleanup.sh`.
 
+## Verification
+
+Each phase ends with an explicit check before moving to the next:
+
+- After Postgres deploy: `oc -n demo-db rsh deploy/postgres psql -U todo -d todos -c "\\dt"` shows the `todos` table.
+- After todo backend deploy: `oc -n demo-todo rsh deploy/todo-backend curl -sf localhost:8000/healthz` returns `{"ok":true}`.
+- After frontend deploy: `curl -sk https://app.travels.../` returns HTML containing `<title>`.
+- After Skupper link: `skupper status` on both cluster and RHEL show `sitesInNetwork: 2`, link `operational: true`.
+- After Skupper Listener+Connector: `oc -n demo-weather run curlpod --image=curlimages/curl --rm -i --restart=Never -- curl -sf http://weather:8080/healthz` returns `{"ok":true}`.
+- After HTTPRoutes apply: `oc get httproute -A` shows all three `Accepted: True`, `ResolvedRefs: True`.
+- After AuthPolicy + RateLimitPolicy apply: `oc get authpolicy,ratelimitpolicy -A` shows `Enforced: True`.
+- Final smoke test: `scripts/test-policies.sh` runs the full demo curl sequence (anonymous 401, free 200×5 + 429, premium 200×30, weather IP-limit 200×10 + 429) and asserts each expected response code.
+
+If any check fails, fix the cause before proceeding — do not skip ahead.
+
+## Final documentation
+
+Once every check above passes, write a `README.md` at the repo root that captures the runnable demo. It must include:
+
+1. Architecture diagram (ASCII or rendered from the spec).
+2. Prereqs (oc, podman, skupper v2 CLI, ssh access to RHEL, Quay credentials).
+3. One-shot deploy sequence (`scripts/deploy-ocp.sh` then `scripts/deploy-rhel.sh`).
+4. Step-by-step demo script with the exact curl commands and expected outputs.
+5. Teardown (`scripts/cleanup.sh`).
+6. Troubleshooting section listing the verification commands above and what to look at when each fails.
+7. A "What was actually built" section that mirrors the spec sections but reflects any deviations made during implementation.
+
 ## Out of scope
 
 - Istio sidecars on application workloads (Service Mesh is installed but not used for the dataplane between services).
@@ -238,5 +266,5 @@ The `app.travels...` HTTPRoute has no AuthPolicy/RateLimitPolicy. The UI must lo
 - **Wildcard cert may not cover newly created subdomains immediately.** `prod-web-tls-policy` is set to manage the listener hostname `*.travels...`, so any host under that wildcard is covered by the existing cert. Verify with `curl -kv` on first call.
 - **Skupper podman site requires user-level systemd or persistent process.** Use `skupper site create --platform podman` and the auto-generated systemd user unit; document `loginctl enable-linger lab-user` so it survives logout.
 - **OpenShift restricted SCC blocks nginx official image** (binds port 80 as root). Use `nginxinc/nginx-unprivileged` listening on 8080, with Service port 80 → targetPort 8080.
-- **Image builds on cluster** — use `oc new-build --binary` + `oc start-build --from-dir` to avoid needing an external registry. Stream source from local laptop.
+- **Image registry: Quay.io** — both `todo` and `weather` images are built locally with `podman build` on the laptop and pushed to public Quay repos under `rh-ee-srehman`. Login is via `podman login quay.io` using the user-supplied robot token. OpenShift and RHEL podman pull directly from Quay; no in-cluster build or registry plumbing required.
 - **Skupper version mismatch** (cluster 2.0.1, local CLI 2.1.1) — should be wire-compatible per Skupper v2 release notes; if `skupper token redeem` fails, fall back to manifest-only token transfer (apply `AccessToken` YAML directly on RHEL podman site).
