@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from . import db, models
 
-ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "https://app.travels.sandbox3259.opentlc.com")
+ALLOWED_ORIGIN = os.environ["ALLOWED_ORIGIN"]
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):

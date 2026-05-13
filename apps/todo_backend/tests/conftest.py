@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault("ALLOWED_ORIGIN", "https://test.example.com")
+
 import pytest
 from fastapi.testclient import TestClient
 

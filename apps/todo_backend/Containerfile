@@ -4,10 +4,7 @@ USER 0
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY *.py ./
-# Make this a package-importable module under /app
-RUN mkdir -p /app/todo_backend && mv *.py /app/todo_backend/ && touch /app/todo_backend/__init__.py && \
-    echo "" > /app/__init__.py
+COPY . /app/todo_backend/
 
 USER 1001
 EXPOSE 8000

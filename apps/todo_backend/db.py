@@ -59,5 +59,8 @@ async def update_todo(todo_id: int, title: Optional[str], completed: Optional[bo
 
 async def delete_todo(todo_id: int) -> bool:
     async with _pool.acquire() as conn:
-        result = await conn.execute("DELETE FROM todos WHERE id = $1", todo_id)
-        return result.endswith(" 1")
+        row = await conn.fetchrow(
+            "DELETE FROM todos WHERE id = $1 RETURNING id",
+            todo_id,
+        )
+        return row is not None
