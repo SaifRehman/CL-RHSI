@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CL-RHSI Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>CL-RHSI Demo</h1>
+    <div class="tier">
+      <label for="tier">Identity tier:</label>
+      <select id="tier">
+        <option value="free">free (5/min)</option>
+        <option value="premium">premium (30/min)</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <section id="todo-section">
+      <h2>Todos</h2>
+      <form id="todo-form">
+        <input id="todo-input" placeholder="What needs doing?" maxlength="200" required>
+        <button type="submit">Add</button>
+      </form>
+      <ul id="todo-list"></ul>
+      <div id="todo-status" class="status"></div>
+    </section>
+
+    <section id="weather-section">
+      <h2>Weather</h2>
+      <form id="weather-form">
+        <input id="city-input" placeholder="City (e.g. Berlin)" required>
+        <button type="submit">Fetch</button>
+      </form>
+      <div id="weather-card"></div>
+      <div id="weather-status" class="status"></div>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

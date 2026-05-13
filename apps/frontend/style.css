@@ -1,0 +1,15 @@
+body { font-family: -apple-system, Segoe UI, sans-serif; max-width: 780px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 1rem; }
+main { display: grid; gap: 2rem; margin-top: 2rem; }
+section { background: #fafafa; padding: 1rem 1.25rem; border-radius: 8px; }
+form { display: flex; gap: 0.5rem; }
+input { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+button { padding: 0.5rem 1rem; background: #0066cc; color: white; border: 0; border-radius: 4px; cursor: pointer; }
+button:hover { background: #0052a3; }
+ul { list-style: none; padding: 0; }
+li { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+li.done span { text-decoration: line-through; color: #999; }
+.status { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.2rem; }
+.status.error { color: #c00; }
+.status.warn { color: #c80; }
+#weather-card { padding: 0.5rem 0; font-size: 1.1rem; }

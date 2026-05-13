@@ -1,0 +1,7 @@
+// Rendered by scripts/deploy-ocp.sh into a ConfigMap as config.js
+window.CFG = {
+  TODO_URL: "__TODO_URL__",
+  WEATHER_URL: "__WEATHER_URL__",
+  KEY_FREE: "__KEY_FREE__",
+  KEY_PREMIUM: "__KEY_PREMIUM__",
+};
