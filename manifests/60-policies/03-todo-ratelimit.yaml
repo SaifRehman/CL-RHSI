@@ -14,7 +14,7 @@ spec:
         - limit: 5
           window: 1m
       when:
-        - predicate: "auth.identity.groups == 'free'"
+        - predicate: "auth.identity.groups == 'free' && request.method != 'OPTIONS'"
       counters:
         - expression: auth.identity.userid
     premium-tier:
@@ -22,6 +22,6 @@ spec:
         - limit: 30
           window: 1m
       when:
-        - predicate: "auth.identity.groups == 'premium'"
+        - predicate: "auth.identity.groups == 'premium' && request.method != 'OPTIONS'"
       counters:
         - expression: auth.identity.userid

@@ -9,9 +9,11 @@ spec:
     kind: HTTPRoute
     name: weather-route
   limits:
-    per-ip:
+    per-route:
       rates:
         - limit: 10
           window: 1m
+      when:
+        - predicate: "request.method != 'OPTIONS'"
       counters:
         - expression: request.host

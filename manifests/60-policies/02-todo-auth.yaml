@@ -19,6 +19,12 @@ spec:
         credentials:
           authorizationHeader:
             prefix: APIKEY
+        when:
+          - predicate: "request.method != 'OPTIONS'"
+      cors-preflight:
+        anonymous: {}
+        when:
+          - predicate: "request.method == 'OPTIONS'"
     response:
       success:
         filters:
