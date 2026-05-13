@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-frontend
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-todo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-db
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-weather
