@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.DS_Store
+rhel/link-token.yaml
+manifests/30-frontend/01-configmap.rendered.yaml
+*.local.yaml
